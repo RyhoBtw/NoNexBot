@@ -1,20 +1,16 @@
 package main
 
 import (
+	"NoiseDcBot"
 	"NoiseDcBot/events"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"log"
+	"time"
 )
 
-type conf struct {
-	Token string `yaml:"token"`
-}
-
 func main() {
-	c, err := readConf("conf.yml")
+	c, err := NoiseDcBot.ReadConf("conf.yml")
 	if err != nil {
 		log.Println(err)
 	}
@@ -29,8 +25,12 @@ func main() {
 		return
 	}
 
+	session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildMembers
+
 	session.AddHandler(onReady)
-	session.AddHandler(events.OnGuildMemberAdd)
+	session.AddHandler(func(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
+		events.OnGuildMemberAdd(s, m, c)
+	})
 	session.AddHandler(events.OnMssageCreate)
 
 	err = session.Open()
@@ -44,22 +44,50 @@ func main() {
 	select {}
 }
 
-func onReady(session *discordgo.Session, event *discordgo.Ready) {
+func onReady(s *discordgo.Session, event *discordgo.Ready) {
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
 
+	_, err := s.ChannelMessageSend("823971053545062474", "Bot is online")
+	if err != nil {
+		log.Println(err)
+	}
+
+	go deletChannel(s)
 }
 
-func readConf(filename string) (*conf, error) {
-	buf, err := ioutil.ReadFile(filename)
+func deletChannel(s *discordgo.Session) {
+	c, err := NoiseDcBot.ReadConf("conf.yml")
 	if err != nil {
-		return nil, err
+		log.Println(err)
+	}
+	channelID := c.StreamChannel
+	channel, err := s.Channel(channelID)
+	if err != nil {
+		log.Println("Channel with ID:", channelID, "not Found")
 	}
 
-	c := &conf{}
-	err = yaml.Unmarshal(buf, c)
-	if err != nil {
-		return nil, fmt.Errorf("in file %q: %w", filename, err)
-	}
+	for {
+		day := time.Now().Day()
+		if day == 1 {
+			messages, err := s.ChannelMessages(channelID, channel.MessageCount, "", "", "")
+			if err != nil {
+				log.Println(err)
+			}
 
-	return c, err
+			messageIDs := make([]string, len(messages))
+
+			for i, message := range messages {
+				messageIDs[i] = message.ID
+			}
+
+			for i, _ := range messages {
+				err := s.ChannelMessageDelete(channelID, messageIDs[i])
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}
+
+		time.Sleep(24 * time.Hour)
+	}
 }
