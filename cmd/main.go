@@ -2,6 +2,7 @@ package main
 
 import (
 	"NoiseDcBot"
+	"NoiseDcBot/database"
 	"NoiseDcBot/events"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
@@ -10,7 +11,15 @@ import (
 )
 
 func main() {
-	c, err := NoiseDcBot.ReadConf("conf.yml")
+
+	_, err := NoiseDcBot.ReadDBConf("DBConf.yml")
+	if err != nil {
+		log.Println(err)
+	}
+
+	_ = database.ConnectToDatabase()
+
+	c, err := NoiseDcBot.ReadBotConf("conf.yml")
 	if err != nil {
 		log.Println(err)
 	}
@@ -56,7 +65,7 @@ func onReady(s *discordgo.Session, event *discordgo.Ready) {
 }
 
 func deletChannel(s *discordgo.Session) {
-	c, err := NoiseDcBot.ReadConf("conf.yml")
+	c, err := NoiseDcBot.ReadBotConf("conf.yml")
 	if err != nil {
 		log.Println(err)
 	}

@@ -2,12 +2,14 @@ package events
 
 import (
 	"NoiseDcBot"
+	"NoiseDcBot/database"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"log"
+	"time"
 )
 
-func OnGuildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *NoiseDcBot.Conf) {
+func OnGuildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *NoiseDcBot.BotConf) {
 	userId := m.User.ID
 
 	message := fmt.Sprintf(c.JoinMessage, userId)
@@ -28,5 +30,14 @@ func OnGuildMemberAdd(s *discordgo.Session, m *discordgo.GuildMemberAdd, c *Nois
 	err = s.GuildMemberRoleAdd(m.GuildID, m.User.ID, role.ID)
 	if err != nil {
 		log.Println("error adding role to user:", err)
+	}
+
+	db := database.OpenDB()
+	defer db.Close()
+
+	q := fmt.Sprintf("INSERT INTO user (user_id, username, joinDate) VALUES ('%s', '%s', '%v');", userId, m.User.Username, time.Now().Format("2006-01-02"))
+	_, err = db.Query(q)
+	if err != nil {
+		log.Println("ERROT: Insert %v", err)
 	}
 }
