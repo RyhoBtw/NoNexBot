@@ -56,10 +56,10 @@ func main() {
 func onReady(s *discordgo.Session, event *discordgo.Ready) {
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
 
-	_, err := s.ChannelMessageSend("823971053545062474", "Bot is online")
+	/*_, err := s.ChannelMessageSend("823971053545062474", "Bot is online")
 	if err != nil {
 		log.Println(err)
-	}
+	}*/
 
 	go deletChannel(s)
 }

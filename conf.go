@@ -10,11 +10,13 @@ import (
 var config *Configurations
 
 type BotConf struct {
-	Token         string `yaml:"token"`
-	JoinMessage   string `yaml:"joinMessage"`
-	JoinChannel   string `yaml:"joinChannel"`
-	JoinRole      string `yaml:"joinRole"`
-	StreamChannel string `yaml:"streamChannel"`
+	Token           string `yaml:"token"`
+	JoinMessage     string `yaml:"joinMessage"`
+	JoinChannel     string `yaml:"joinChannel"`
+	JoinRole        string `yaml:"joinRole"`
+	StreamChannel   string `yaml:"streamChannel"`
+	GuildID         string `yaml:"guildID"`
+	SupportCategory string `yaml:"supportCategory"`
 }
 
 type Configurations struct {
