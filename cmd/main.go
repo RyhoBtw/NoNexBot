@@ -36,11 +36,11 @@ func main() {
 
 	session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildMembers
 
-	session.AddHandler(onReady)
 	session.AddHandler(func(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 		events.OnGuildMemberAdd(s, m, c)
 	})
 	session.AddHandler(events.OnMssageCreate)
+	session.AddHandler(onReady)
 
 	err = session.Open()
 	if err != nil {

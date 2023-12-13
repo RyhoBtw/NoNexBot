@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"log"
 	"strings"
+	"time"
 )
 
 func CreateTicket(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -48,20 +49,57 @@ func CreateTicket(s *discordgo.Session, m *discordgo.MessageCreate) {
 			panic(err)
 		}
 	}
-	createSupportChannel(s, m, id)
+	createSupportChannel(s, m, id, messageContent)
 }
 
-func createSupportChannel(s *discordgo.Session, m *discordgo.MessageCreate, id int) {
-	conf, err := NoiseDcBot.ReadBotConf("DBConf.yml")
+func createSupportChannel(s *discordgo.Session, m *discordgo.MessageCreate, id int, text string) {
+	conf, err := NoiseDcBot.ReadBotConf("conf.yml")
 	guildID := conf.GuildID
-	channelName := fmt.Sprintf("supportTicket -", id)
+	channelName := fmt.Sprintf("supportTicket-%v", id)
 
-	_, err = s.GuildChannelCreate(guildID, channelName, discordgo.ChannelTypeGuildText)
+	channel, err := s.GuildChannelCreateComplex(guildID, discordgo.GuildChannelCreateData{
+		Name:     channelName,
+		Type:     discordgo.ChannelTypeGuildText,
+		Topic:    "Ticket",
+		ParentID: conf.SupportCategory,
+	})
 	if err != nil {
-		fmt.Println("error creating channel,", err)
+		log.Println("Error creating channel: ", err)
 		return
 	}
-	//_, err = s.ChannelEditComplex(channel.ID, &discordgo.ChannelEdit{
-	//	ParentID: conf.SupportCategory,
-	//})
+
+	err = s.ChannelPermissionSet(channel.ID, m.Author.ID, discordgo.PermissionOverwriteTypeMember, discordgo.PermissionViewChannel, 0)
+	if err != nil {
+		return
+	}
+	err = s.ChannelPermissionSet(channel.ID, m.Author.ID, discordgo.PermissionOverwriteTypeMember, discordgo.PermissionSendMessages, 0)
+	if err != nil {
+		return
+	}
+
+	/*for _, role := range guild.Roles {
+		if role.Name == "Admin" || role.Name == "Moderator" {
+			guild.ChannelPermissionOverwrites(channel.ID).Add(discordgo.RoleID(role.ID), discordgo.Permission{
+				VIEW_CHANNEL:  true,
+				SEND_MESSAGES: true,
+			})
+		}
+	}*/
+
+	message := fmt.Sprintf("<@%s> createed a ticket about: %s", m.Author.ID, text)
+
+	embed := &discordgo.MessageEmbed{
+		Color:       0x000000, // Change to your desired color
+		Title:       "Welcome to your support channel!",
+		Description: message,
+		//Image:       &discordgo.MessageEmbedImage{URL: m.Author.AvatarURL("original")},
+		Timestamp: time.Now().UTC().Format(time.DateTime),
+	}
+
+	_, err = s.ChannelMessageSendEmbed(channel.ID, embed)
+	if err != nil {
+		log.Println("Error creating Message: ", err)
+		return
+	}
+
 }
