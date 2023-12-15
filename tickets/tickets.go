@@ -113,3 +113,20 @@ func createSupportChannel(s *discordgo.Session, m *discordgo.MessageCreate, id i
 	}
 
 }
+
+func CloseTicket(s *discordgo.Session, m *discordgo.MessageCreate) {
+	channelID := m.ChannelID
+	fmt.Println(channelID)
+	db := database.OpenDB()
+	defer db.Close()
+	q := fmt.Sprintf("UPDATE tickets SET closed = false WHERE channel_id = '%s';", channelID) // doesn't work?
+	test, err := db.Query(q)
+	fmt.Println(test)
+	if err != nil {
+		log.Println(err)
+	}
+	_, err = s.ChannelDelete(channelID)
+	if err != nil {
+		log.Println(err)
+	}
+}
