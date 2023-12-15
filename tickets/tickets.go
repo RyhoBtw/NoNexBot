@@ -60,8 +60,14 @@ func createSupportChannel(s *discordgo.Session, m *discordgo.MessageCreate, id i
 	channel, err := s.GuildChannelCreateComplex(guildID, discordgo.GuildChannelCreateData{
 		Name:     channelName,
 		Type:     discordgo.ChannelTypeGuildText,
-		Topic:    "Ticket",
+		Topic:    fmt.Sprintf("%v", id),
 		ParentID: conf.SupportCategory,
+		PermissionOverwrites: []*discordgo.PermissionOverwrite{
+			{ID: conf.JoinRole,
+				Type:  discordgo.PermissionOverwriteTypeRole,
+				Deny:  discordgo.PermissionViewChannel,
+				Allow: 0},
+		},
 	})
 	if err != nil {
 		log.Println("Error creating channel: ", err)
@@ -72,21 +78,25 @@ func createSupportChannel(s *discordgo.Session, m *discordgo.MessageCreate, id i
 	if err != nil {
 		return
 	}
-	err = s.ChannelPermissionSet(channel.ID, m.Author.ID, discordgo.PermissionOverwriteTypeMember, discordgo.PermissionSendMessages, 0)
-	if err != nil {
-		return
+	var roleID string
+	guild, err := s.Guild(guildID)
+	for _, role := range guild.Roles {
+		if role.Name == "Admin" {
+			roleID = role.ID
+		}
+	}
+	for _, member := range guild.Members {
+		for _, role := range member.Roles {
+			if role == roleID {
+				err = s.ChannelPermissionSet(channel.ID, member.User.ID, discordgo.PermissionOverwriteTypeMember, discordgo.PermissionViewChannel, 0)
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+		}
 	}
 
-	/*for _, role := range guild.Roles {
-		if role.Name == "Admin" || role.Name == "Moderator" {
-			guild.ChannelPermissionOverwrites(channel.ID).Add(discordgo.RoleID(role.ID), discordgo.Permission{
-				VIEW_CHANNEL:  true,
-				SEND_MESSAGES: true,
-			})
-		}
-	}*/
-
-	message := fmt.Sprintf("<@%s> createed a ticket about: %s", m.Author.ID, text)
+	message := fmt.Sprintf("<@%s> createed a ticket %s", m.Author.ID, text)
 
 	embed := &discordgo.MessageEmbed{
 		Color:       0x000000, // Change to your desired color

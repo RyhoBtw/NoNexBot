@@ -1,6 +1,8 @@
 package events
 
 import (
+	"NoiseDcBot"
+	"NoiseDcBot/database"
 	"NoiseDcBot/tickets"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
@@ -8,6 +10,10 @@ import (
 )
 
 func OnMssageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+	conf, err := NoiseDcBot.ReadBotConf("conf.yml")
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -15,6 +21,17 @@ func OnMssageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if strings.HasPrefix(m.Content, "!ticket create") {
 		tickets.CreateTicket(s, m)
+	}
+
+	guild, err := s.Guild(conf.GuildID)
+
+	for _, channel := range guild.Channels {
+		if channel.ParentID == conf.SupportCategory {
+			supportID := channel.Topic
+			db := database.OpenDB()
+			defer db.Close()
+			q := fmt.Sprintf()
+		}
 	}
 
 	if strings.HasPrefix(m.Content, "!poll") {
