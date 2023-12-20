@@ -9,17 +9,26 @@ import (
 	"time"
 )
 
+func isEmoji(r rune) bool {
+	return (r >= 0x1F300 && r <= 0x1F5FF) || (r >= 0x1F600 && r <= 0x1F64F) || (r >= 0x1F680 && r <= 0x1F6FF) || (r >= 0x1F900 && r <= 0x1F9FF)
+}
+
 func CreatePoll(s *discordgo.Session, m *discordgo.MessageCreate) {
 	date := time.Now().Format(time.DateTime)
 	db := database.OpenDB()
 	defer db.Close()
 
+	// !poll create :one: This is the answer for one :two: This is the answer for two :three: This is the answer for three "What do you like most 1, 2, or 3?"
+
 	parts := strings.Split(m.Content, "\"")
 
-	question := parts[1]
-	fmt.Println(parts[0])
-	parts[0] = parts[0][13:]
-	splitStr := strings.Split(parts[0], ":")
+	question := parts[1]  // What do you like most 1, 2, or 3?
+	part := parts[0][13:] // :one: This is the answer for one :two: This is the answer for two :three: This is the answer for three
+
+	splitStr := strings.FieldsFunc(part, isEmoji)
+
+	fmt.Println(splitStr[0])
+	fmt.Println(splitStr)
 
 	var emojis []string
 	var texts []string
