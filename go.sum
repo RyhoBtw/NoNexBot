@@ -1,3 +1,5 @@
+github.com/SubLuLu/grapheme-splitter v0.0.0-20190108090012-1c706d78ac26 h1:UqF/C9xfIfdWhbDVMxWdIrvLn/lDPREcOCAJL6+tp04=
+github.com/SubLuLu/grapheme-splitter v0.0.0-20190108090012-1c706d78ac26/go.mod h1:TA5zhsqEJh68OuMHu4/vBNKgY5CRmNrJD2UNWqTJb6I=
 github.com/bwmarrin/discordgo v0.27.1 h1:ib9AIc/dom1E/fSIulrBwnez0CToJE113ZGt4HoliGY=
 github.com/bwmarrin/discordgo v0.27.1/go.mod h1:NJZpH+1AfhIcyQsPeuBKsUtYrRnjkyu0kIVMCHkZtRY=
 github.com/go-sql-driver/mysql v1.7.1 h1:lUIinVbN1DY0xBg0eMOzmmtGoHwWBbvnWubQUrtU8EI=

@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/SubLuLu/grapheme-splitter v0.0.0-20190108090012-1c706d78ac26 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/kenshaw/emoji v0.3.3 // indirect
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b // indirect

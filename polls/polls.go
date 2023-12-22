@@ -3,15 +3,13 @@ package polls
 import (
 	"NoiseDcBot/database"
 	"fmt"
+	splitter "github.com/SubLuLu/grapheme-splitter"
 	"github.com/bwmarrin/discordgo"
 	"log"
 	"strings"
 	"time"
+	"unicode"
 )
-
-func isEmoji(r rune) bool {
-	return (r >= 0x1F300 && r <= 0x1F5FF) || (r >= 0x1F600 && r <= 0x1F64F) || (r >= 0x1F680 && r <= 0x1F6FF) || (r >= 0x1F900 && r <= 0x1F9FF)
-}
 
 func CreatePoll(s *discordgo.Session, m *discordgo.MessageCreate) {
 	date := time.Now().Format(time.DateTime)
@@ -25,21 +23,24 @@ func CreatePoll(s *discordgo.Session, m *discordgo.MessageCreate) {
 	question := parts[1]  // What do you like most 1, 2, or 3?
 	part := parts[0][13:] // :one: This is the answer for one :two: This is the answer for two :three: This is the answer for three
 
-	splitStr := strings.FieldsFunc(part, isEmoji)
+	splitStr := splitter.Split(part)
 
-	fmt.Println(splitStr[0])
-	fmt.Println(splitStr)
+	log.Println(splitStr)
 
 	var emojis []string
 	var texts []string
-
-	for i := 0; i < len(splitStr); i++ {
-		if i%2 == 0 {
-			emojis = append(emojis, splitStr[i])
+	text := ""
+	for _, char := range splitStr {
+		if !unicode.IsLetter([]rune(char)[0]) {
+			text = fmt.Sprint(text, char)
 		} else {
-			texts = append(texts, splitStr[i])
+			texts = append(texts, text)
+			emojis = append(emojis, char)
 		}
 	}
+
+	log.Println(emojis)
+	log.Println(texts)
 
 	getId := fmt.Sprintf("SELECT id FROM user WHERE user_id='%s';", m.Author.ID)
 	rows, err := db.Query(getId)
