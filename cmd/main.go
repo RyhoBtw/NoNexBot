@@ -34,6 +34,11 @@ func main() {
 		return
 	}
 
+	_, err = session.ApplicationCommandCreate("1106901093729964153", c.GuildID, NoiseDcBot.Poll())
+	if err != nil {
+		log.Println("Failed:", err)
+	}
+
 	session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildMembers
 
 	session.AddHandler(func(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
@@ -41,6 +46,7 @@ func main() {
 	})
 	session.AddHandler(events.OnMssageCreate)
 	session.AddHandler(onReady)
+	session.AddHandler(events.OnInteraction)
 
 	err = session.Open()
 	if err != nil {

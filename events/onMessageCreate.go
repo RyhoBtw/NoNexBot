@@ -1,7 +1,6 @@
 package events
 
 import (
-	"NoiseDcBot/polls"
 	"NoiseDcBot/tickets"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
@@ -23,7 +22,7 @@ func OnMssageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.HasPrefix(m.Content, "!poll create") {
-		polls.CreatePoll(s, m)
+		//polls.CreatePoll(s, m)
 	}
 
 	if m.Content == "!results" {
