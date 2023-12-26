@@ -41,7 +41,7 @@ func OnInteraction(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 			polls.CreatePoll(question, maxChoices, allowedRole, text, anonymous, answers, s, i)
 		}
-		if i.ApplicationCommandData().Name == "ticket create" {
+		if i.ApplicationCommandData().Name == "ticketcreate" {
 			var text string
 
 			// Iterate over all options
@@ -51,7 +51,7 @@ func OnInteraction(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 			tickets.CreateTicket(text, s, i)
 		}
-		if i.ApplicationCommandData().Name == "ticket create" {
+		if i.ApplicationCommandData().Name == "ticketclose" {
 			tickets.CloseTicket(s, i)
 		}
 	}

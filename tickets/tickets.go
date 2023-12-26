@@ -10,7 +10,7 @@ import (
 )
 
 func CreateTicket(text string, s *discordgo.Session, i *discordgo.InteractionCreate) {
-	userId := i.ID
+	userId := i.Member.User.ID
 	db := database.OpenDB()
 	defer db.Close()
 	getId := fmt.Sprintf("SELECT id FROM user WHERE user_id='%s';", userId)
@@ -27,7 +27,7 @@ func CreateTicket(text string, s *discordgo.Session, i *discordgo.InteractionCre
 		}
 	}
 
-	q := fmt.Sprintf("INSERT INTO tickets (user, channel_id, message, closed) VALUES (%v, '%s', '%s', %t);", id, i.ChannelID, text, false)
+	q := fmt.Sprintf("INSERT INTO tickets (user, channel_id, message) VALUES (%v, '%s', '%s');", id, i.ChannelID, text)
 	_, err = db.Query(q)
 	if err != nil {
 		log.Println(err)
@@ -80,11 +80,13 @@ func createSupportChannel(s *discordgo.Session, i *discordgo.InteractionCreate, 
 		}
 	}
 	for _, member := range guild.Members {
-		for _, role := range member.Roles {
-			if role == roleID {
-				err = s.ChannelPermissionSet(channel.ID, member.User.ID, discordgo.PermissionOverwriteTypeMember, discordgo.PermissionViewChannel, 0)
-				if err != nil {
-					fmt.Println(err)
+		if member.User.ID != i.Member.User.ID {
+			for _, role := range member.Roles {
+				if role == roleID {
+					err = s.ChannelPermissionSet(channel.ID, member.User.ID, discordgo.PermissionOverwriteTypeMember, discordgo.PermissionViewChannel, 0)
+					if err != nil {
+						fmt.Println(err)
+					}
 				}
 			}
 		}
