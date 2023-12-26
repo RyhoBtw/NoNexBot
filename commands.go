@@ -2,6 +2,30 @@ package NoiseDcBot
 
 import "github.com/bwmarrin/discordgo"
 
+func CreateTicket() (ticket *discordgo.ApplicationCommand) {
+	ticket = &discordgo.ApplicationCommand{
+		Name:        "ticketcreate",
+		Description: "Creates a Support ticket",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionString,
+				Name:        "text",
+				Description: "What is your ticket about?",
+				Required:    true,
+			},
+		},
+	}
+	return ticket
+}
+
+func CloseTicket() (ticket *discordgo.ApplicationCommand) {
+	ticket = &discordgo.ApplicationCommand{
+		Name:        "ticketclose",
+		Description: "Closes a Support ticket",
+	}
+	return ticket
+}
+
 func Poll() (poll *discordgo.ApplicationCommand) {
 	poll = &discordgo.ApplicationCommand{
 		Name:        "poll",

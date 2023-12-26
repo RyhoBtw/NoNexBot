@@ -14,8 +14,6 @@ func CreatePoll(question string, maxChoices int, allowedRole *discordgo.Role, te
 	db := database.OpenDB()
 	defer db.Close()
 
-	log.Println("ID", i.ID)
-
 	var emojis []string
 
 	for _, answer := range answers {
@@ -52,6 +50,7 @@ func CreatePoll(question string, maxChoices int, allowedRole *discordgo.Role, te
 	question = fmt.Sprintf("\n %s \n **Settings** \n ", question)
 
 	embed := &discordgo.MessageEmbed{
+		Title:       text,
 		Color:       0x000000, // Change to your desired color
 		Description: question,
 		Timestamp:   date,

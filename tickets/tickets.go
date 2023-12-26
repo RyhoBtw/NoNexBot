@@ -6,13 +6,11 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"log"
-	"strings"
 	"time"
 )
 
-func CreateTicket(s *discordgo.Session, m *discordgo.MessageCreate) {
-	userId := m.Author.ID
-	messageContent := strings.TrimPrefix(m.Message.Content, "!ticket create")
+func CreateTicket(text string, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	userId := i.ID
 	db := database.OpenDB()
 	defer db.Close()
 	getId := fmt.Sprintf("SELECT id FROM user WHERE user_id='%s';", userId)
@@ -29,16 +27,12 @@ func CreateTicket(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
-	q := fmt.Sprintf("INSERT INTO tickets (user, channel_id, message, closed) VALUES (%v, '%s', '%s', %t);", id, m.ChannelID, messageContent, false)
+	q := fmt.Sprintf("INSERT INTO tickets (user, channel_id, message, closed) VALUES (%v, '%s', '%s', %t);", id, i.ChannelID, text, false)
 	_, err = db.Query(q)
 	if err != nil {
 		log.Println(err)
 	}
-	err = s.ChannelMessageDelete(m.ChannelID, m.ID)
-	if err != nil {
-		log.Println(err)
-	}
-	q = fmt.Sprintf("SELECT id FROM tickets WHERE message='%s'", messageContent)
+	q = fmt.Sprintf("SELECT id FROM tickets WHERE message='%s'", text)
 	rows, err = db.Query(q)
 	if err != nil {
 		log.Println(err)
@@ -49,10 +43,10 @@ func CreateTicket(s *discordgo.Session, m *discordgo.MessageCreate) {
 			panic(err)
 		}
 	}
-	createSupportChannel(s, m, id, messageContent)
+	createSupportChannel(s, i, id, text)
 }
 
-func createSupportChannel(s *discordgo.Session, m *discordgo.MessageCreate, id int, text string) {
+func createSupportChannel(s *discordgo.Session, i *discordgo.InteractionCreate, id int, text string) {
 	conf, err := NoiseDcBot.ReadBotConf("conf.yml")
 	guildID := conf.GuildID
 	channelName := fmt.Sprintf("supportTicket-%v", id)
@@ -74,7 +68,7 @@ func createSupportChannel(s *discordgo.Session, m *discordgo.MessageCreate, id i
 		return
 	}
 
-	err = s.ChannelPermissionSet(channel.ID, m.Author.ID, discordgo.PermissionOverwriteTypeMember, discordgo.PermissionViewChannel, 0)
+	err = s.ChannelPermissionSet(channel.ID, i.ID, discordgo.PermissionOverwriteTypeMember, discordgo.PermissionViewChannel, 0)
 	if err != nil {
 		return
 	}
@@ -96,7 +90,7 @@ func createSupportChannel(s *discordgo.Session, m *discordgo.MessageCreate, id i
 		}
 	}
 
-	message := fmt.Sprintf("<@%s> createed a ticket %s", m.Author.ID, text)
+	message := fmt.Sprintf("<@%s> createed a ticket %s", i.ID, text)
 
 	embed := &discordgo.MessageEmbed{
 		Color:       0x000000, // Change to your desired color
@@ -114,8 +108,8 @@ func createSupportChannel(s *discordgo.Session, m *discordgo.MessageCreate, id i
 
 }
 
-func CloseTicket(s *discordgo.Session, m *discordgo.MessageCreate) {
-	channelID := m.ChannelID
+func CloseTicket(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	channelID := i.ChannelID
 	fmt.Println(channelID)
 	db := database.OpenDB()
 	defer db.Close()

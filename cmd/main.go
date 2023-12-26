@@ -38,13 +38,20 @@ func main() {
 	if err != nil {
 		log.Println("Failed:", err)
 	}
+	_, err = session.ApplicationCommandCreate("1106901093729964153", c.GuildID, NoiseDcBot.CreateTicket())
+	if err != nil {
+		log.Println("Failed:", err)
+	}
+	_, err = session.ApplicationCommandCreate("1106901093729964153", c.GuildID, NoiseDcBot.CloseTicket())
+	if err != nil {
+		log.Println("Failed:", err)
+	}
 
 	session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildMembers
 
 	session.AddHandler(func(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 		events.OnGuildMemberAdd(s, m, c)
 	})
-	session.AddHandler(events.OnMssageCreate)
 	session.AddHandler(onReady)
 	session.AddHandler(events.OnInteraction)
 

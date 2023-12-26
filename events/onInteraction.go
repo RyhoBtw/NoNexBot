@@ -2,6 +2,7 @@ package events
 
 import (
 	"NoiseDcBot/polls"
+	"NoiseDcBot/tickets"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -39,6 +40,19 @@ func OnInteraction(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			}
 
 			polls.CreatePoll(question, maxChoices, allowedRole, text, anonymous, answers, s, i)
+		}
+		if i.ApplicationCommandData().Name == "ticket create" {
+			var text string
+
+			// Iterate over all options
+			for _, opt := range i.ApplicationCommandData().Options {
+				text = opt.StringValue()
+			}
+
+			tickets.CreateTicket(text, s, i)
+		}
+		if i.ApplicationCommandData().Name == "ticket create" {
+			tickets.CloseTicket(s, i)
 		}
 	}
 }
