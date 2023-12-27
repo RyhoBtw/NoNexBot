@@ -54,7 +54,8 @@ func main() {
 	})
 	session.AddHandler(onReady)
 	session.AddHandler(events.OnInteraction)
-	session.AddHandler(events.OnReaction)
+	session.AddHandler(events.OnReactionAdd)
+	session.AddHandler(events.OnReactionRemove)
 
 	err = session.Open()
 	if err != nil {

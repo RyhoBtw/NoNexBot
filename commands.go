@@ -56,12 +56,6 @@ func Poll() (poll *discordgo.ApplicationCommand) {
 				Required:    false,
 			},
 			{
-				Type:        discordgo.ApplicationCommandOptionBoolean,
-				Name:        "anonymous",
-				Description: "Is the poll anonym?",
-				Required:    false,
-			},
-			{
 				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "answer1",
 				Description: "Put emoji first than put awnser option",

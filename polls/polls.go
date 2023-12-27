@@ -23,8 +23,6 @@ func CreatePoll(question string, maxChoices int, allowedRole *discordgo.Role, te
 		emojis = append(emojis, parts[0])
 	}
 
-	log.Println("Emojis", emojis)
-
 	getId := fmt.Sprintf("SELECT id FROM user WHERE user_id='%s';", i.Member.User.ID)
 	rows, err := db.Query(getId)
 	if err != nil {
@@ -56,12 +54,6 @@ func CreatePoll(question string, maxChoices int, allowedRole *discordgo.Role, te
 		roleID = allowedRole.ID
 	}
 
-	q := fmt.Sprintf("INSERT INTO polls (user, message, channel_id, reactions, date, maxchoices, role, anonymus) VALUES ('%v', '%s', '%s', '%s', '%s', '%v', '%s', '%v');", id, i.Data.Type().String(), i.ChannelID, emojis, date, maxChoices, roleID, anonym)
-	_, err = db.Exec(q)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	question = fmt.Sprintf("**Question** \n %s \n \n **Coices** \n", question)
 
 	for i, _ := range answers {
@@ -71,7 +63,6 @@ func CreatePoll(question string, maxChoices int, allowedRole *discordgo.Role, te
 	question = fmt.Sprintf("\n %s \n **Settings** \n", question)
 
 	question = fmt.Sprintf("%s Max choises: %v \n", question, maxChoices)
-	question = fmt.Sprintf("%s Anonym: %t \n", question, anonymous)
 	question = fmt.Sprintf("%s allowed Role: <@&%s> \n", question, roleID)
 
 	embed := &discordgo.MessageEmbed{
@@ -91,6 +82,12 @@ func CreatePoll(question string, maxChoices int, allowedRole *discordgo.Role, te
 		if err != nil {
 			fmt.Println("Error creating Message: ", err)
 		}
+	}
+
+	q := fmt.Sprintf("INSERT INTO polls (user, message, channel_id, reactions, date, maxchoices, role, anonymus, message_id) VALUES ('%v', '%s', '%s', '%s', '%s', '%v', '%s', '%v', '%s');", id, i.Data.Type().String(), i.ChannelID, emojis, date, maxChoices, roleID, anonym, pollMessage.ID)
+	_, err = db.Exec(q)
+	if err != nil {
+		fmt.Println(err)
 	}
 
 }
