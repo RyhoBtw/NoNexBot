@@ -17,6 +17,7 @@ type BotConf struct {
 	StreamChannel   string `yaml:"streamChannel"`
 	GuildID         string `yaml:"guildID"`
 	SupportCategory string `yaml:"supportCategory"`
+	TeamRole        string `yaml:"teamRole"`
 }
 
 type Configurations struct {

@@ -47,13 +47,14 @@ func main() {
 		log.Println("Failed:", err)
 	}
 
-	session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildMembers
+	session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildMembers | discordgo.IntentsGuildMessageReactions
 
 	session.AddHandler(func(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 		events.OnGuildMemberAdd(s, m, c)
 	})
 	session.AddHandler(onReady)
 	session.AddHandler(events.OnInteraction)
+	session.AddHandler(events.OnReaction)
 
 	err = session.Open()
 	if err != nil {

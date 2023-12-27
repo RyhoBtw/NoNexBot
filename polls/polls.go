@@ -1,6 +1,7 @@
 package polls
 
 import (
+	"NoiseDcBot"
 	"NoiseDcBot/database"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
@@ -10,6 +11,7 @@ import (
 )
 
 func CreatePoll(question string, maxChoices int, allowedRole *discordgo.Role, text string, anonymous bool, answers []string, s *discordgo.Session, i *discordgo.InteractionCreate) {
+	conf, err := NoiseDcBot.ReadBotConf("conf.yml")
 	date := time.Now().Format(time.DateTime)
 	db := database.OpenDB()
 	defer db.Close()
@@ -23,7 +25,7 @@ func CreatePoll(question string, maxChoices int, allowedRole *discordgo.Role, te
 
 	log.Println("Emojis", emojis)
 
-	getId := fmt.Sprintf("SELECT id FROM user WHERE user_id='%s';", i.ID)
+	getId := fmt.Sprintf("SELECT id FROM user WHERE user_id='%s';", i.Member.User.ID)
 	rows, err := db.Query(getId)
 	if err != nil {
 		log.Println(err)
@@ -35,7 +37,26 @@ func CreatePoll(question string, maxChoices int, allowedRole *discordgo.Role, te
 			panic(err)
 		}
 	}
-	q := fmt.Sprintf("INSERT INTO polls (user, message, channel_id, reactions, date) VALUES ('%v', '%s', '%s', '%s', '%s');", id, i.Data.Type().String(), i.ChannelID, emojis, date)
+
+	if maxChoices == 0 {
+		maxChoices = 1
+	}
+
+	var anonym int
+	if anonymous {
+		anonym = 1
+	} else {
+		anonym = 0
+	}
+
+	var roleID string
+	if allowedRole == nil {
+		roleID = conf.JoinRole
+	} else {
+		roleID = allowedRole.ID
+	}
+
+	q := fmt.Sprintf("INSERT INTO polls (user, message, channel_id, reactions, date, maxchoices, role, anonymus) VALUES ('%v', '%s', '%s', '%s', '%s', '%v', '%s', '%v');", id, i.Data.Type().String(), i.ChannelID, emojis, date, maxChoices, roleID, anonym)
 	_, err = db.Exec(q)
 	if err != nil {
 		fmt.Println(err)
@@ -47,7 +68,11 @@ func CreatePoll(question string, maxChoices int, allowedRole *discordgo.Role, te
 		question = fmt.Sprintf("%s \n %s \n", question, answers[i])
 	}
 
-	question = fmt.Sprintf("\n %s \n **Settings** \n ", question)
+	question = fmt.Sprintf("\n %s \n **Settings** \n", question)
+
+	question = fmt.Sprintf("%s Max choises: %v \n", question, maxChoices)
+	question = fmt.Sprintf("%s Anonym: %t \n", question, anonymous)
+	question = fmt.Sprintf("%s allowed Role: <@&%s> \n", question, roleID)
 
 	embed := &discordgo.MessageEmbed{
 		Title:       text,
